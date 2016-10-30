@@ -1,0 +1,24 @@
+##If no arguments supplied then list all GCE instances, wait for selection, and then execute selection
+if [[ -z "$1" ]]; then
+  list="$(gcloud compute instances list | grep -v NAME | awk -F ' ' '{print NR ":" $1}')"
+  clear
+  for x in $list; do
+    echo "$x"
+  done
+
+  echo ":===Choose Wisely====:"
+  read sel
+
+  for y in $list; do
+    if [[ $y == *$sel*  ]]; then
+       name="$(echo "$y" | cut -d ":" -f 2)"
+    fi
+  done
+
+fi
+
+if [[ -z "$name" ]]; then
+  name="$1"
+fi
+
+gcloud compute ssh "$name" --zone "$(gcloud compute instances list | grep -F "$name "  | awk -F ' ' '{print $2}')"
